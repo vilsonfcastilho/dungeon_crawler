@@ -8,5 +8,5 @@ pub fn end_turn(#[resource] turn_state: &mut TurnState) {
         TurnState::MosterTurn => TurnState::AwaitingInput,
     };
 
-    return *turn_state = new_state;
+    *turn_state = new_state;
 }
