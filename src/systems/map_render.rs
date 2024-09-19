@@ -22,5 +22,5 @@ pub fn map_render(#[resource] map: &Map, #[resource] camera: &Camera) {
         }
     }
 
-    return draw_batch.submit(0).expect("Batch error");
+    draw_batch.submit(0).expect("Batch error");
 }
