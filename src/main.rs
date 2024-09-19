@@ -1,7 +1,9 @@
 mod camera;
+mod components;
 mod map;
 mod map_builder;
-mod player;
+mod spawner;
+mod systems;
 
 mod prelude {
     pub use bracket_lib::prelude::*;
@@ -10,9 +12,11 @@ mod prelude {
     pub use legion::*;
 
     pub use crate::camera::*;
+    pub use crate::components::*;
     pub use crate::map::*;
     pub use crate::map_builder::*;
-    pub use crate::player::*;
+    pub use crate::spawner::*;
+    pub use crate::systems::*;
 
     pub const SCREEN_WIDTH: i32 = 80;
     pub const SCREEN_HEIGHT: i32 = 50;
@@ -23,20 +27,33 @@ mod prelude {
 use prelude::*;
 
 struct State {
-    map: Map,
-    player: Player,
-    camera: Camera,
+    ecs: World,
+    resources: Resources,
+    systems: Schedule,
 }
 
 impl State {
     fn new() -> Self {
+        let mut ecs: World = World::default();
+        let mut resources: Resources = Resources::default();
         let mut rng: RandomNumberGenerator = RandomNumberGenerator::new();
         let map_builder: MapBuilder = MapBuilder::new(&mut rng);
 
+        resources.insert(map_builder.map);
+        resources.insert(Camera::new(map_builder.player_start));
+        map_builder
+            .rooms
+            .iter()
+            .skip(1)
+            .map(|r: &Rect| r.center())
+            .for_each(|pos: Point| spawn_monster(&mut ecs, &mut rng, pos));
+
+        spawn_player(&mut ecs, map_builder.player_start);
+
         return Self {
-            map: map_builder.map,
-            player: Player::new(map_builder.player_start),
-            camera: Camera::new(map_builder.player_start),
+            ecs,
+            resources,
+            systems: build_scheduler(),
         };
     }
 }
@@ -44,9 +61,9 @@ impl State {
 impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
         ctx.cls();
-        self.map.render(ctx, &self.camera);
-        self.player.update(ctx, &self.map, &mut self.camera);
-        self.player.render(ctx, &self.camera);
+        self.resources.insert(ctx.key);
+        self.systems.execute(&mut self.ecs, &mut self.resources);
+        render_draw_buffer(ctx).expect("Render error");
     }
 }
 
@@ -59,7 +76,8 @@ fn main() -> BError {
         .with_resource_path("resources/")
         .with_font("dungeonfont.png", 32, 32)
         .with_simple_console(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
+        .with_simple_console_no_bg(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
         .build()?;
 
-    main_loop(context, State::new())
+    return main_loop(context, State::new());
 }
