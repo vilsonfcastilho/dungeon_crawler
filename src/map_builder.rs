@@ -25,7 +25,10 @@ impl MapBuilder {
     }
 
     fn fill(&mut self, tile: TileType) {
-        self.map.tiles.iter_mut().for_each(|t| *t = tile);
+        self.map
+            .tiles
+            .iter_mut()
+            .for_each(|t: &mut TileType| *t = tile);
     }
 
     fn build_random_rooms(&mut self, rng: &mut RandomNumberGenerator) {
@@ -33,8 +36,8 @@ impl MapBuilder {
             let room: Rect = Rect::with_size(
                 rng.range(1, SCREEN_WIDTH - 10),
                 rng.range(1, SCREEN_HEIGHT - 10),
-                rng.range(2, 10),
-                rng.range(2, 10),
+                rng.range(6, 10),
+                rng.range(6, 10),
             );
 
             let mut overlap: bool = false;
@@ -45,9 +48,9 @@ impl MapBuilder {
             }
 
             if !overlap {
-                room.for_each(|p| {
+                room.for_each(|p: Point| {
                     if p.x > 0 && p.x < SCREEN_WIDTH && p.y > 0 && p.y < SCREEN_HEIGHT {
-                        let idx = map_idx(p.x, p.y);
+                        let idx: usize = map_idx(p.x, p.y);
                         self.map.tiles[idx] = TileType::Floor;
                     }
                 });
@@ -77,7 +80,7 @@ impl MapBuilder {
 
     fn build_corridors(&mut self, rng: &mut RandomNumberGenerator) {
         let mut rooms: Vec<Rect> = self.rooms.clone();
-        rooms.sort_by(|a, b| a.center().x.cmp(&b.center().x));
+        rooms.sort_by(|a: &Rect, b: &Rect| a.center().x.cmp(&b.center().x));
 
         for (i, room) in rooms.iter().enumerate().skip(1) {
             let prev: Point = rooms[i - 1].center();
