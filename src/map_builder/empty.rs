@@ -5,7 +5,7 @@ pub struct EmptyArchitect {}
 
 impl MapArchitect for EmptyArchitect {
     fn new(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
-        let mut mb = MapBuilder {
+        let mut mb: MapBuilder = MapBuilder {
             map: Map::new(),
             rooms: Vec::new(),
             monster_spawns: Vec::new(),
