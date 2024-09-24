@@ -41,17 +41,24 @@ impl State {
         let mut ecs: World = World::default();
         let mut resources: Resources = Resources::default();
         let mut rng: RandomNumberGenerator = RandomNumberGenerator::new();
+
         let map_builder: MapBuilder = MapBuilder::new(&mut rng);
 
-        resources.insert(map_builder.map);
-        resources.insert(Camera::new(map_builder.player_start));
-        resources.insert(TurnState::AwaitingInput);
         map_builder
             .rooms
             .iter()
             .skip(1)
             .map(|r: &Rect| r.center())
             .for_each(|pos: Point| spawn_monster(&mut ecs, &mut rng, pos));
+
+        map_builder
+            .monster_spawns
+            .iter()
+            .for_each(|pos: &Point| spawn_monster(&mut ecs, &mut rng, *pos));
+
+        resources.insert(map_builder.map);
+        resources.insert(Camera::new(map_builder.player_start));
+        resources.insert(TurnState::AwaitingInput);
 
         spawn_player(&mut ecs, map_builder.player_start);
         spawn_amulet_of_yala(&mut ecs, map_builder.amulet_start);
@@ -81,6 +88,11 @@ impl State {
             .skip(1)
             .map(|r| r.center())
             .for_each(|pos| spawn_monster(&mut self.ecs, &mut rng, pos));
+
+        map_builder
+            .monster_spawns
+            .iter()
+            .for_each(|pos: &Point| spawn_monster(&mut self.ecs, &mut rng, *pos));
 
         self.resources.insert(map_builder.map);
         self.resources.insert(Camera::new(map_builder.player_start));
