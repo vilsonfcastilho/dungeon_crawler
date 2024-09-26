@@ -2,6 +2,13 @@
 
 A 2D Dungeon Crawler game created in Rust to study folowing the Hands-on Rust book. 📖
 
+Explore the dungeons levels, kill the enemies and find the "Amulet of Yala". 📿
+
+![Dungeon Crawler Screenshot](assets/dungeon_crawler_printscreen_1.png)
+![Dungeon Crawler Screenshot](assets/dungeon_crawler_printscreen_2.png)
+
+## ⚙️ Tools
+
 - 👾 **bracket-lib** - Roguelike game tollkit
 - 🧩 **legion** - High performance entity component librady
 
